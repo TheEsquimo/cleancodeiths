@@ -2,42 +2,53 @@
 
 namespace TollFeeCalculator
 {
-    class Program
+    public class TollCalculator
     {
         static void Main()
         {
-            run(Environment.CurrentDirectory + "../../../../testData.txt");
+            Run(Environment.CurrentDirectory + "../../../../testData.txt");
         }
 
-        static void run(String inputFile) {
-            string indata = System.IO.File.ReadAllText(inputFile);
-            String[] dateStrings = indata.Split(", ");
-            DateTime[] dates = new DateTime[dateStrings.Length-1];
-            for(int i = 0; i < dates.Length; i++) {
+        public static void Run(string inputFile)
+        {
+            var timeStamps = GetTimeStamps(inputFile);
+            Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(timeStamps));
+        }
+
+        static DateTime[] GetTimeStamps(string inputFile)
+        {
+            string inData = System.IO.File.ReadAllText(inputFile);
+            string[] dateStrings = inData.Split(", ");
+            DateTime[] dates = new DateTime[dateStrings.Length - 1];
+            for (int i = 0; i < dates.Length; i++)
+            {
                 dates[i] = DateTime.Parse(dateStrings[i]);
             }
-            Console.Write("The total fee for the inputfile is" + TotalFeeCost(dates));
+            return dates;
         }
-
-        static int TotalFeeCost(DateTime[] d) {
+        static int CalculateTotalTollFeeCost(DateTime[] d)
+        {
             int fee = 0;
             DateTime si = d[0]; //Starting interval
             foreach (var d2 in d)
             {
                 long diffInMinutes = (d2 - si).Minutes;
-                if(diffInMinutes > 60) {
-                    fee += TollFeePass(d2);
+                if (diffInMinutes > 60)
+                {
+                    fee += CalculateTollFee(d2);
                     si = d2;
-                } else {
-                    fee += Math.Max(TollFeePass(d2), TollFeePass(si));
+                }
+                else
+                {
+                    fee += Math.Max(CalculateTollFee(d2), CalculateTollFee(si));
                 }
             }
             return Math.Max(fee, 60);
         }
 
-        static int TollFeePass(DateTime d)
+        static int CalculateTollFee(DateTime d)
         {
-            if (free(d)) return 0;
+            if (IsTollFree(d)) return 0;
             int hour = d.Hour;
             int minute = d.Minute;
             if (hour == 6 && minute >= 0 && minute <= 29) return 8;
@@ -52,8 +63,9 @@ namespace TollFeeCalculator
             else return 0;
         }
         //Gets free dates
-        static bool free(DateTime day) {
-        return (int)day.DayOfWeek == 5 || (int)day.DayOfWeek == 6 || day.Month == 7;
+        static bool IsTollFree(DateTime day)
+        {
+            return (int)day.DayOfWeek == 5 || (int)day.DayOfWeek == 6 || day.Month == 7;
         }
     }
 }
