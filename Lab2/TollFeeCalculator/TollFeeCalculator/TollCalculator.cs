@@ -4,68 +4,97 @@ namespace TollFeeCalculator
 {
     public class TollCalculator
     {
+        const int maxTollCharge = 60;
+        const string testDataPath = "../../../../testData.txt";
+
         static void Main()
         {
-            Run(Environment.CurrentDirectory + "../../../../testData.txt");
+            Run(new File(), Environment.CurrentDirectory + testDataPath);
         }
 
-        public static void Run(string inputFile)
+        public static void Run(IFile file, string inputFile)
         {
-            var timeStamps = GetTimeStamps(inputFile);
+            var timeStamps = GetDatesFromFile(file, inputFile);
             Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(timeStamps));
         }
 
-        static DateTime[] GetTimeStamps(string inputFile)
+        static DateTime[] GetDatesFromFile(IFile file, string inputFile)
         {
-            string inData = System.IO.File.ReadAllText(inputFile);
-            string[] dateStrings = inData.Split(", ");
-            DateTime[] dates = new DateTime[dateStrings.Length - 1];
+            string fileData = file.ReadAllText(inputFile);
+            string[] dateStrings = fileData.Split(", ");
+            DateTime[] dates = new DateTime[dateStrings.Length];
             for (int i = 0; i < dates.Length; i++)
             {
                 dates[i] = DateTime.Parse(dateStrings[i]);
             }
             return dates;
         }
-        static int CalculateTotalTollFeeCost(DateTime[] d)
+
+        static int CalculateTotalTollFeeCost(DateTime[] dates)
         {
             int fee = 0;
-            DateTime si = d[0]; //Starting interval
-            foreach (var d2 in d)
+            int highestFeeWithinHour = 0;
+            DateTime currentCompareDate = dates[0];
+            for (int i = 0; i < dates.Length; i++)
             {
-                long diffInMinutes = (d2 - si).Minutes;
+                double diffInMinutes = (dates[i] - currentCompareDate).TotalMinutes;
                 if (diffInMinutes > 60)
                 {
-                    fee += CalculateTollFee(d2);
-                    si = d2;
+                    fee += highestFeeWithinHour;
+                    highestFeeWithinHour = CalculateTollFee(dates[i]);
+                    currentCompareDate = dates[i];
+                    if (i == dates.Length - 1)
+                        fee += highestFeeWithinHour;
                 }
                 else
                 {
-                    fee += Math.Max(CalculateTollFee(d2), CalculateTollFee(si));
+                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(currentCompareDate));
+                    if (i == dates.Length - 1)
+                        fee += highestFeeWithinHour;
                 }
             }
-            return Math.Max(fee, 60);
+            return Math.Clamp(fee, 0, maxTollCharge);
         }
 
-        static int CalculateTollFee(DateTime d)
+        static int CalculateTollFee(DateTime date)
         {
-            if (IsTollFree(d)) return 0;
-            int hour = d.Hour;
-            int minute = d.Minute;
-            if (hour == 6 && minute >= 0 && minute <= 29) return 8;
-            else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
-            else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
-            else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-            else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
-            else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
-            else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
-            else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
-            else if (hour == 18 && minute >= 0 && minute <= 29) return 8;
-            else return 0;
+            int tollFee = 0;
+            int hour = date.Hour;
+            int minute = date.Minute;
+
+            if (IsTollFree(date))
+                tollFee = 0;
+            if (hour == 6 && minute >= 0 && minute <= 29)
+                tollFee = 8;
+            else if (hour == 6 && minute >= 30 && minute <= 59)
+                tollFee = 13;
+            else if (hour == 7 && minute >= 0 && minute <= 59)
+                tollFee = 18;
+            else if (hour == 8 && minute >= 0 && minute <= 29)
+                tollFee = 13;
+            else if (hour == 8 && minute >= 30 && minute <= 59)
+                tollFee = 8;
+            else if (hour >= 9 && hour <= 14)
+                tollFee = 8;
+            else if (hour == 15 && minute >= 0 && minute <= 29)
+                tollFee = 13;
+            else if ( (hour == 15 && minute >= 30) || (hour == 16 && minute <= 59) )
+                tollFee = 18;
+            else if (hour == 17 && minute >= 0 && minute <= 59)
+                tollFee = 13;
+            else if (hour == 18 && minute >= 0 && minute <= 29)
+                tollFee = 8;
+            else tollFee = 0;
+
+            return tollFee;
         }
-        //Gets free dates
+
         static bool IsTollFree(DateTime day)
         {
-            return (int)day.DayOfWeek == 5 || (int)day.DayOfWeek == 6 || day.Month == 7;
+            bool isTollFree = day.DayOfWeek == DayOfWeek.Saturday ||
+                day.DayOfWeek == DayOfWeek.Sunday ||
+                day.Month == 7;
+            return isTollFree;
         }
     }
 }
