@@ -96,7 +96,15 @@ namespace TollFeeCalculatorTests
         [TestMethod]
         public void TestMaximumTollCharge()
         {
-
+            MockFile mockFile = new MockFile();
+            using (StringWriter stringWriter = new StringWriter())
+            {
+                Console.SetOut(stringWriter);
+                string exceedsDayMaximumToll = "2020-11-27 06:30, 2020-11-27 07:31, 2020-11-27 08:32, 2020-11-27 15:00, 2020-11-27 16:01";
+                string expected = "The total fee for the inputfile is 60";
+                TollCalculator.Run(mockFile, exceedsDayMaximumToll);
+                Assert.AreEqual(expected, stringWriter.ToString());
+            }
         }
     }
 }
