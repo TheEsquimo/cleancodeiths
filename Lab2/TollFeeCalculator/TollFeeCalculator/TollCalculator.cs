@@ -4,12 +4,12 @@ namespace TollFeeCalculator
 {
     public class TollCalculator
     {
-        const int maxTollCharge = 60;
+        const int MaxTollCharge = 60;
 
         public void Run(IFile file, string filePath)
         {
-            var timeStamps = GetDatesFromFile(file, filePath);
-            Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(timeStamps));
+            DateTime[] dates = GetDatesFromFile(file, filePath);
+            Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(dates));
         }
 
         DateTime[] GetDatesFromFile(IFile file, string filePath)
@@ -41,13 +41,12 @@ namespace TollFeeCalculator
                 else
                 {
                     int currentDateFee = CalculateTollFee(dates[i]);
-                    int compareDateFee = CalculateTollFee(compareDate);
-                    highestFeeWithinHour = Math.Max(currentDateFee, compareDateFee);
+                    highestFeeWithinHour = Math.Max(currentDateFee, highestFeeWithinHour);
                 }
                 if (i == dates.Length - 1)
                     fee += highestFeeWithinHour;
             }
-            return Math.Clamp(fee, 0, maxTollCharge);
+            return Math.Clamp(fee, 0, MaxTollCharge);
         }
 
         int CalculateTollFee(DateTime date)

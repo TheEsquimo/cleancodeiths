@@ -17,9 +17,9 @@ namespace TollFeeCalculatorTests
             using (StringWriter stringWriter = new StringWriter())
             {
                 Console.SetOut(stringWriter);
-                string threeWithinAnHour = "2020-11-27 06:20, 2020-11-27 06:59, 2020-11-27 07:10";
+                string datesWithinAnHour = "2020-11-27 06:20, 2020-11-27 06:30, 2020-11-27 07:10";
                 string expected = "The total fee for the inputfile is 18";
-                tollCalculator.Run(mockFile, threeWithinAnHour);
+                tollCalculator.Run(mockFile, datesWithinAnHour);
                 Assert.AreEqual(expected, stringWriter.ToString());
             }
         }
