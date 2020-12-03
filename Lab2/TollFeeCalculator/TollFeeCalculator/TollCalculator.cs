@@ -35,21 +35,21 @@ namespace TollFeeCalculator
         {
             int fee = 0;
             int highestFeeWithinHour = 0;
-            DateTime currentCompareDate = dates[0];
+            DateTime compareDate = dates[0];
             for (int i = 0; i < dates.Length; i++)
             {
-                double diffInMinutes = (dates[i] - currentCompareDate).TotalMinutes;
+                double diffInMinutes = (dates[i] - compareDate).TotalMinutes;
                 if (diffInMinutes > 60)
                 {
                     fee += highestFeeWithinHour;
                     highestFeeWithinHour = CalculateTollFee(dates[i]);
-                    currentCompareDate = dates[i];
+                    compareDate = dates[i];
                     if (i == dates.Length - 1)
                         fee += highestFeeWithinHour;
                 }
                 else
                 {
-                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(currentCompareDate));
+                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(compareDate));
                     if (i == dates.Length - 1)
                         fee += highestFeeWithinHour;
                 }
