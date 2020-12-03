@@ -12,15 +12,15 @@ namespace TollFeeCalculator
             Run(new File(), Environment.CurrentDirectory + testDataPath);
         }
 
-        public static void Run(IFile file, string inputFile)
+        public static void Run(IFile file, string filePath)
         {
-            var timeStamps = GetDatesFromFile(file, inputFile);
+            var timeStamps = GetDatesFromFile(file, filePath);
             Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(timeStamps));
         }
 
-        static DateTime[] GetDatesFromFile(IFile file, string inputFile)
+        static DateTime[] GetDatesFromFile(IFile file, string filePath)
         {
-            string fileData = file.ReadAllText(inputFile);
+            string fileData = file.ReadAllText(filePath);
             string[] dateStrings = fileData.Split(", ");
             DateTime[] dates = new DateTime[dateStrings.Length];
             for (int i = 0; i < dates.Length; i++)
@@ -34,21 +34,21 @@ namespace TollFeeCalculator
         {
             int fee = 0;
             int highestFeeWithinHour = 0;
-            DateTime currentCompareDate = dates[0];
+            DateTime compareDate = dates[0];
             for (int i = 0; i < dates.Length; i++)
             {
-                double diffInMinutes = (dates[i] - currentCompareDate).TotalMinutes;
+                double diffInMinutes = (dates[i] - compareDate).TotalMinutes;
                 if (diffInMinutes > 60)
                 {
                     fee += highestFeeWithinHour;
                     highestFeeWithinHour = CalculateTollFee(dates[i]);
-                    currentCompareDate = dates[i];
+                    compareDate = dates[i];
                     if (i == dates.Length - 1)
                         fee += highestFeeWithinHour;
                 }
                 else
                 {
-                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(currentCompareDate));
+                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(compareDate));
                     if (i == dates.Length - 1)
                         fee += highestFeeWithinHour;
                 }
