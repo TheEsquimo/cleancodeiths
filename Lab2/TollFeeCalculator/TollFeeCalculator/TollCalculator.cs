@@ -58,7 +58,7 @@ namespace TollFeeCalculator
 
         static int CalculateTollFee(DateTime date)
         {
-            int tollFee = 0;
+            int tollFee;
             int hour = date.Hour;
             int minute = date.Minute;
 

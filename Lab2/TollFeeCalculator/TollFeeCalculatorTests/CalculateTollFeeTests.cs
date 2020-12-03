@@ -92,5 +92,11 @@ namespace TollFeeCalculatorTests
                 }
             }
         }
+
+        [TestMethod]
+        public void TestMaximumTollCharge()
+        {
+
+        }
     }
 }
