@@ -1,5 +1,4 @@
-﻿using System;
-using TollFeeCalculator;
+﻿using TollFeeCalculator;
 
 namespace TollFeeCalculatorTests
 {

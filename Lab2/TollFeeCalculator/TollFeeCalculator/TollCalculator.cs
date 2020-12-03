@@ -5,13 +5,6 @@ namespace TollFeeCalculator
     public class TollCalculator
     {
         const int maxTollCharge = 60;
-        const string testDataPath = "../../../../testData.txt";
-
-        static void Main()
-        {
-            TollCalculator tollCalculator = new TollCalculator();
-            tollCalculator.Run(new File(), Environment.CurrentDirectory + testDataPath);
-        }
 
         public void Run(IFile file, string filePath)
         {
@@ -48,8 +41,8 @@ namespace TollFeeCalculator
                 else
                 {
                     int currentDateFee = CalculateTollFee(dates[i]);
-                    int otherDateFee = CalculateTollFee(compareDate);
-                    highestFeeWithinHour = Math.Max(currentDateFee, otherDateFee);
+                    int compareDateFee = CalculateTollFee(compareDate);
+                    highestFeeWithinHour = Math.Max(currentDateFee, compareDateFee);
                 }
                 if (i == dates.Length - 1)
                     fee += highestFeeWithinHour;
@@ -63,7 +56,7 @@ namespace TollFeeCalculator
             int hour = date.Hour;
             int minute = date.Minute;
 
-            if (IsTollFree(date))
+            if (IsDayTollFree(date))
                 tollFee = 0;
             if (hour == 6 && minute >= 0 && minute <= 29)
                 tollFee = 8;
@@ -90,7 +83,7 @@ namespace TollFeeCalculator
             return tollFee;
         }
 
-        bool IsTollFree(DateTime day)
+        bool IsDayTollFree(DateTime day)
         {
             bool isTollFree = day.DayOfWeek == DayOfWeek.Saturday ||
                 day.DayOfWeek == DayOfWeek.Sunday ||
