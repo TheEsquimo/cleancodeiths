@@ -44,15 +44,15 @@ namespace TollFeeCalculator
                     fee += highestFeeWithinHour;
                     highestFeeWithinHour = CalculateTollFee(dates[i]);
                     compareDate = dates[i];
-                    if (i == dates.Length - 1)
-                        fee += highestFeeWithinHour;
                 }
                 else
                 {
-                    highestFeeWithinHour = Math.Max(CalculateTollFee(dates[i]), CalculateTollFee(compareDate));
-                    if (i == dates.Length - 1)
-                        fee += highestFeeWithinHour;
+                    int currentDateFee = CalculateTollFee(dates[i]);
+                    int otherDateFee = CalculateTollFee(compareDate);
+                    highestFeeWithinHour = Math.Max(currentDateFee, otherDateFee);
                 }
+                if (i == dates.Length - 1)
+                    fee += highestFeeWithinHour;
             }
             return Math.Clamp(fee, 0, maxTollCharge);
         }
