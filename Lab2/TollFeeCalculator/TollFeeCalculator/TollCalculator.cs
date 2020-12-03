@@ -9,18 +9,19 @@ namespace TollFeeCalculator
 
         static void Main()
         {
-            Run(new File(), Environment.CurrentDirectory + testDataPath);
+            TollCalculator tollCalculator = new TollCalculator();
+            tollCalculator.Run(new File(), Environment.CurrentDirectory + testDataPath);
         }
 
-        public static void Run(IFile file, string inputFile)
+        public void Run(IFile file, string filePath)
         {
-            var timeStamps = GetDatesFromFile(file, inputFile);
+            var timeStamps = GetDatesFromFile(file, filePath);
             Console.Write("The total fee for the inputfile is " + CalculateTotalTollFeeCost(timeStamps));
         }
 
-        static DateTime[] GetDatesFromFile(IFile file, string inputFile)
+        DateTime[] GetDatesFromFile(IFile file, string filePath)
         {
-            string fileData = file.ReadAllText(inputFile);
+            string fileData = file.ReadAllText(filePath);
             string[] dateStrings = fileData.Split(", ");
             DateTime[] dates = new DateTime[dateStrings.Length];
             for (int i = 0; i < dates.Length; i++)
@@ -30,7 +31,7 @@ namespace TollFeeCalculator
             return dates;
         }
 
-        static int CalculateTotalTollFeeCost(DateTime[] dates)
+        int CalculateTotalTollFeeCost(DateTime[] dates)
         {
             int fee = 0;
             int highestFeeWithinHour = 0;
@@ -56,7 +57,7 @@ namespace TollFeeCalculator
             return Math.Clamp(fee, 0, maxTollCharge);
         }
 
-        static int CalculateTollFee(DateTime date)
+        int CalculateTollFee(DateTime date)
         {
             int tollFee;
             int hour = date.Hour;
@@ -89,7 +90,7 @@ namespace TollFeeCalculator
             return tollFee;
         }
 
-        static bool IsTollFree(DateTime day)
+        bool IsTollFree(DateTime day)
         {
             bool isTollFree = day.DayOfWeek == DayOfWeek.Saturday ||
                 day.DayOfWeek == DayOfWeek.Sunday ||
