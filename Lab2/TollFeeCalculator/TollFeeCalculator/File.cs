@@ -1,6 +1,6 @@
 ﻿namespace TollFeeCalculator
 {
-    class File : IFile
+    public class File : IFile
     {
         public string ReadAllText(string path)
         {

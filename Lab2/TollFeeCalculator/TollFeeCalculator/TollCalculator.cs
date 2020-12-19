@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace TollFeeCalculator
 {
@@ -14,12 +15,15 @@ namespace TollFeeCalculator
 
         DateTime[] GetDatesFromFile(IFile file, string filePath)
         {
+            if (!System.IO.File.Exists(filePath))
+                throw new FileNotFoundException();
             string fileData = file.ReadAllText(filePath);
             string[] dateStrings = fileData.Split(", ");
             DateTime[] dates = new DateTime[dateStrings.Length];
             for (int i = 0; i < dates.Length; i++)
             {
-                dates[i] = DateTime.Parse(dateStrings[i]);
+                if (!DateTime.TryParse(dateStrings[i], out dates[i]))
+                    throw new FormatException();
             }
             return dates;
         }
@@ -49,7 +53,7 @@ namespace TollFeeCalculator
             return Math.Clamp(fee, 0, MaxTollCharge);
         }
 
-        int CalculateTollFee(DateTime date)
+        public int CalculateTollFee(DateTime date)
         {
             int tollFee;
             int hour = date.Hour;
@@ -82,7 +86,7 @@ namespace TollFeeCalculator
             return tollFee;
         }
 
-        bool IsDayTollFree(DateTime day)
+        public bool IsDayTollFree(DateTime day)
         {
             bool isTollFree = day.DayOfWeek == DayOfWeek.Saturday ||
                 day.DayOfWeek == DayOfWeek.Sunday ||

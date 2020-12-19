@@ -13,13 +13,13 @@ namespace TollFeeCalculatorTests
         public void TestHighestTollFeeWithinHourRule()
         {
             TollCalculator tollCalculator = new TollCalculator();
-            MockFile mockFile = new MockFile();
             using (StringWriter stringWriter = new StringWriter())
             {
                 Console.SetOut(stringWriter);
-                string datesWithinAnHour = "2020-11-27 06:20, 2020-11-27 06:30, 2020-11-27 07:10";
+                string datesWithinAnHour = Path.GetFullPath(Path.Combine(
+                    Environment.CurrentDirectory, "..", "..", "..", "MockingTestData", "datesWithinAnHour.txt"));
                 string expected = "The total fee for the inputfile is 18";
-                tollCalculator.Run(mockFile, datesWithinAnHour);
+                tollCalculator.Run(new TollFeeCalculator.File(), datesWithinAnHour);
                 Assert.AreEqual(expected, stringWriter.ToString());
             }
         }
@@ -28,7 +28,6 @@ namespace TollFeeCalculatorTests
         public void TestAccuracyOfTollPricesByTime()
         {
             TollCalculator tollCalculator = new TollCalculator();
-            MockFile mockFile = new MockFile();
             Dictionary<DateTime, int> tollFeeTestKeys = new Dictionary<DateTime, int>
             {
                 { new DateTime(2020, 11, 27, 6, 0, 0), 8 },
@@ -55,14 +54,10 @@ namespace TollFeeCalculatorTests
 
             foreach (var tollFeeTest in tollFeeTestKeys)
             {
-                using (StringWriter stringWriter = new StringWriter())
-                {
-                    Console.SetOut(stringWriter);
-                    string expected = $"The total fee for the inputfile is {tollFeeTest.Value}";
-                    string tollFeeDate = tollFeeTest.Key.ToString();
-                    tollCalculator.Run(mockFile, tollFeeDate);
-                    Assert.AreEqual(expected, stringWriter.ToString());
-                }
+                    int expected = tollFeeTest.Value;
+                    DateTime tollFeeDate = tollFeeTest.Key;
+                    int result = tollCalculator.CalculateTollFee(tollFeeDate);
+                    Assert.AreEqual(expected, result);
             }
         }
 
@@ -70,7 +65,6 @@ namespace TollFeeCalculatorTests
         public void TestFreeTollDayRules()
         {
             TollCalculator tollCalculator = new TollCalculator();
-            MockFile mockFile = new MockFile();
             DateTime saturday = new DateTime(2020, 12, 5);
             DateTime sunday = new DateTime(2020, 12, 6);
             DateTime firstDayJuly = new DateTime(2020, 7, 1);
@@ -86,13 +80,7 @@ namespace TollFeeCalculatorTests
 
             foreach (var date in freeTollDates)
             {
-                using (StringWriter stringWriter = new StringWriter())
-                {
-                    Console.SetOut(stringWriter);
-                    string expected = $"The total fee for the inputfile is 0";
-                    tollCalculator.Run(mockFile, date.ToString());
-                    Assert.AreEqual(expected, stringWriter.ToString());
-                }
+                    Assert.AreEqual(true, tollCalculator.IsDayTollFree(date));
             }
         }
 
@@ -100,15 +88,33 @@ namespace TollFeeCalculatorTests
         public void TestMaximumTollCharge()
         {
             TollCalculator tollCalculator = new TollCalculator();
-            MockFile mockFile = new MockFile();
             using (StringWriter stringWriter = new StringWriter())
             {
                 Console.SetOut(stringWriter);
-                string exceedsDayMaximumToll = "2020-11-27 06:30, 2020-11-27 07:31, 2020-11-27 08:32, 2020-11-27 15:00, 2020-11-27 16:01";
+                string exceedsDayMaximumToll = Path.GetFullPath(Path.Combine(
+                    Environment.CurrentDirectory, "..", "..", "..", "MockingTestData", "datesExceedingMaximumTollCharge.txt"));
                 string expected = "The total fee for the inputfile is 60";
-                tollCalculator.Run(mockFile, exceedsDayMaximumToll);
+                tollCalculator.Run(new TollFeeCalculator.File(), exceedsDayMaximumToll);
                 Assert.AreEqual(expected, stringWriter.ToString());
             }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void TestIncorrectFilePathExceptionHandling()
+        {
+            TollCalculator tollCalculator = new TollCalculator();
+            tollCalculator.Run(new TollFeeCalculator.File(), "notAFilePath");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public void TestIncorrectFormatExceptionHandling()
+        {
+            TollCalculator tollCalculator = new TollCalculator();
+            string incorrectFormattedDates = Path.GetFullPath(Path.Combine(
+                    Environment.CurrentDirectory, "..", "..", "..", "MockingTestData", "datesInIncorrectFormat.txt"));
+            tollCalculator.Run(new TollFeeCalculator.File(), incorrectFormattedDates);
         }
     }
 }
